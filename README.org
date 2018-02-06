@@ -2,4 +2,30 @@
 #+AUTHOR: Thomas Rometsch
 
 * Description
-Queue Statistics script parsing information from the qstat command of the PBS queuing system
+
+Queue Statistics script parsing information from the qstat command of the PBS queuing system.
+It shows the users who have the highest number of jobs in the.
+
+* Usage
+
+Run
+
+#+BEGIN_SRC sh
+python qstatistics.py
+#+END_SRC
+
+on a host with a PBS queuing system which must provide the =qstat= command.
+Or specify a hostname to get the info from as the first argument like
+
+#+BEGIN_SRC sh
+python qstatistics.py user@hostname
+#+END_SRC
+
+You can also use the hosts which are defined in the ssh config file
+just like using it with the =ssh= command (this is used internally).
+
+* Command line options
+
++ =-h= : print a help message
++ =-N= : specify the number of users printed per queue
++ =-q= : specify the queue(s) to be printed with spaces as separators
