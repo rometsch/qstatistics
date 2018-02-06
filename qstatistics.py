@@ -8,7 +8,7 @@ def argsort(seq):
 
 ap = argparse.ArgumentParser()
 
-ap.add_argument("-t", "--target", help="Specify the targets user@hostname which is used to login to the remote machine via ssh.")
+ap.add_argument("hostname", nargs="?", help="Specify the remote user@hostname which is used to login to the remote machine via ssh.")
 args = ap.parse_args()
 
 # First run qstat on the local host if its supported.
@@ -17,10 +17,11 @@ try:
 	qstat_location = subprocess.check_output(["which", "qstat"])
 	qstat_cmd = ["qstat"]
 except subprocess.CalledProcessError:
-	if not args.target is None:
-		qstat_cmd = ["ssh", args.target, "qstat"]
+	if not args.hostname is None:
+		qstat_cmd = ["ssh", args.hostname, "qstat"]
 	else:
-		print("qstat is neither found on the local system nor a remote target was given with the -t option")
+		print("qstat not found on the system and no host specified! Exit...")
+		ap.print_help()
 		exit(1)
 
 # Now get the queue info
