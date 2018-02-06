@@ -1,2 +1,5 @@
-# qsx
+#+TITLE: qsx
+#+AUTHOR: Thomas Rometsch
+
+* Description
 Queue Statistics script parsing information from the qstat command of the PBS queuing system
