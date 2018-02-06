@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import subprocess
-import numpy as np
 import argparse
+
+def argsort(seq):
+    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
+    return sorted(range(len(seq)), key=seq.__getitem__)
 
 ap = argparse.ArgumentParser()
 
@@ -70,20 +73,21 @@ for user in user_stats:
     NCpuJobs.append(user_stats[user]["num_cpu_jobs"])
     NGpuJobs.append(user_stats[user]["num_gpu_jobs"])
 
-NCpuJobs = np.array(NCpuJobs)
-NGpuJobs = np.array(NGpuJobs)
-Users = np.array(Users)
+NToList = 10
 
-
-NToList = 20
-inds = np.flipud(np.argsort(NCpuJobs))
+NJobs = NCpuJobs
+inds = argsort(NJobs)
+inds.reverse()
 print("Users with most CPU jobs")
-N = np.minimum(NToList, len(NCpuJobs))
-for user, Njobs in zip(Users[inds][:N], NCpuJobs[inds][:N]):
-    print("{} : {}".format(user, Njobs))
+N = min(NToList, len(NJobs))
+for n in inds[:N]:
+	print("{} : {}".format(Users[n], NJobs[n]))
 
-inds = np.flipud(np.argsort(NGpuJobs))
+
+NJobs = NGpuJobs
+inds = argsort(NJobs)
+inds.reverse()
 print("\nUsers with most GPU jobs")
-N = np.minimum(NToList, len(NGpuJobs))
-for user, Njobs in zip(Users[inds][:N], NGpuJobs[inds][:N]):
-    print("{} : {}".format(user, Njobs))
+N = min(NToList, len(NJobs))
+for n in inds[:N]:
+	print("{} : {}".format(Users[n], NJobs[n]))
