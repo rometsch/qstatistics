@@ -118,7 +118,7 @@ for user in user_stats:
 
 NToList = args.NumToPrint
 
-len_user_string = 20
+len_user_string = 30
 len_cnt_string = 6
 
 def get_realnames(ids):
