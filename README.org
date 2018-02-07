@@ -29,3 +29,7 @@ just like using it with the =ssh= command (this is used internally).
 + =-h= : print a help message
 + =-N= : specify the number of users printed per queue
 + =-q= : specify the queue(s) to be printed with spaces as separators
++ =-s= : specify the number to sort by
+  - =t= : total number of jobs
+  - =r= : running jobs
+  - =q= : queued jobs
