@@ -15,12 +15,15 @@ ap.add_argument("-N", "--NumToPrint", default=10, type=int,
 ap.add_argument("-q", "--queue", nargs="+",
 				default=None,
 				help="Queues to print the statistics for. Print all found queues by default. Add queues separeted by a space.")
+ap.add_argument("-f", help="Use a text file as input rather than using the qstat -f command. This is useful for development")
+ap.add_argument("-s", "--sort", choices = ["t", "r", "q"], default = "r"
+				, help="The number to sort the output by:\nt -> total number of jobs\nr -> running jobs\nq -> queued jobs")
 args = ap.parse_args()
 
 # First run qstat on the local host if its supported.
 if not args.hostname is None:
    	qstat_cmd = ["ssh", args.hostname, "qstat"]
-else:
+elif args.f is None:
 	try:
 		# Look for qstat
 		qstat_location = subprocess.check_output(["which", "qstat"])
@@ -30,8 +33,12 @@ else:
 		ap.print_help()
 		exit(1)
 
-# Now get the queue info
-queue_str = subprocess.check_output(qstat_cmd + ["-f"]).decode("ascii")
+if args.f is None:
+	# Now get the queue info
+	queue_str = subprocess.check_output(qstat_cmd + ["-f"]).decode("ascii")
+else:
+	with open(args.f, "r") as f:
+		queue_str = f.read()
 jobs = {}
 job = {}
 key = ""
@@ -65,14 +72,20 @@ found_queues = []
 for key in jobs:
 	user = jobs[key]["euser"]
 	queue = jobs[key]["queue"]
+	state = jobs[key]["job_state"]
 	if not queue in found_queues:
 		found_queues.append(queue)
 	if not user in user_stats:
-		user_stats[user] = { }
+		user_stats[user] = {}
 	if not queue in user_stats[user]:
-		user_stats[user][queue] = 1
+		user_stats[user][queue] = { state : 1, "tot" : 1 }
 	else:
-		user_stats[user][queue] += 1
+		user_stats[user][queue]["tot"] += 1
+		if not state in user_stats[user][queue]:
+			user_stats[user][queue][state] = 1
+		else:
+			user_stats[user][queue][state] += 1
+
 
 # Sort the queue names
 found_queues.sort()
@@ -86,28 +99,52 @@ else:
 # Make lists for each queue with job count and user names
 queue_stats = {}
 for queue in selected_queues:
-	queue_stats[queue] = {"users" : [], "jobcnt" : [], "total" : 0}
+	queue_stats[queue] = {"users" : [], "jobstot" : [],
+						  "total" : 0, "jobsRunning" : [], "jobsQueued" : []}
 for user in user_stats:
 	for queue in selected_queues:
 		if queue in user_stats[user]:
 			queue_stats[queue]["users"].append(user)
-			queue_stats[queue]["jobcnt"].append(user_stats[user][queue])
-			queue_stats[queue]["total"] += user_stats[user][queue]
+			queue_stats[queue]["jobstot"].append(user_stats[user][queue]["tot"])
+			queue_stats[queue]["total"] += user_stats[user][queue]["tot"]
+			for state, key in zip(["R","Q"], ["jobsRunning", "jobsQueued"]):
+				if state in user_stats[user][queue]:
+					num = user_stats[user][queue][state]
+				else:
+					num = 0
+				queue_stats[queue][key].append(num)
 
 
 NToList = args.NumToPrint
 
+len_user_string = 15
+len_cnt_string = 6
+
+def fixed_length_string(s, length):
+	template = "{" + ":{}s".format(length) + "}"
+	return template.format(s)
+
 for queue in selected_queues:
-	jobcnt = queue_stats[queue]["jobcnt"]
-	users = queue_stats[queue]["users"]
-	inds = argsort(jobcnt)
+	jobcnt = ["total", "-"*5] + queue_stats[queue]["jobstot"]
+	runcnt = ["run", "-"*3] + queue_stats[queue]["jobsRunning"]
+	quecnt = ["queued", "-"*6] + queue_stats[queue]["jobsQueued"]
+	users = ["# user","#"+ "-"*(len_user_string-1)] + queue_stats[queue]["users"]
+	if args.sort == "t":
+		sort_list = jobcnt
+	elif args.sort == "q":
+		sort_list = quecnt
+	else:
+		sort_list = runcnt
+	inds = argsort(sort_list)
 	inds.reverse()
 	print("\n#-----------------------------------")
 	print("# queue:\t{}".format(queue))
 	print("# jobs: \t{}".format(queue_stats[queue]["total"]))
 	print("#-----------------------------------")
-	print("# user : num of jobs")
-	print("#---------------------")
 	N = min(NToList, len(jobcnt))
 	for n in inds[:N]:
-		print("{} : {}".format(users[n], jobcnt[n]))
+		user_string = fixed_length_string(users[n], len_user_string)
+		tot_cnt_string = fixed_length_string("{}".format(jobcnt[n]), len_cnt_string)
+		run_cnt_string = fixed_length_string("{}".format(runcnt[n]), len_cnt_string)
+		que_cnt_string = fixed_length_string("{}".format(quecnt[n]), len_cnt_string)
+		print("{}   {} {} {}".format(user_string,run_cnt_string, que_cnt_string, tot_cnt_string ))
