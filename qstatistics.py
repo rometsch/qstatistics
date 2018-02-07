@@ -120,9 +120,27 @@ NToList = args.NumToPrint
 len_user_string = 15
 len_cnt_string = 6
 
+def get_realnames(ids):
+	realnames = {}
+	try:
+		ans = subprocess.check_output(['getent', 'passwd'] +
+									  +['{0}'.format(id) for id in ids]).decode('utf-8')
+		for line in ans.splitlines():
+			id = line.split(":")[0]
+			name = line.split(':')[4]
+			realnames[id] = name:
+		except subprocess.RuntimeError:
+			pass
+	return realnames
+
+
 def fixed_length_string(s, length):
 	template = "{" + ":{}s".format(length) + "}"
 	return template.format(s)
+
+
+# Match ids to real names
+realnames = get_realnames([id for id in user_stats])
 
 for queue in selected_queues:
 	jobcnt = ["total", "-"*5] + queue_stats[queue]["jobstot"]
@@ -143,7 +161,11 @@ for queue in selected_queues:
 	print("#-----------------------------------")
 	N = min(NToList, len(jobcnt))
 	for n in inds[:N]:
-		user_string = fixed_length_string(users[n], len_user_string)
+		if users[n] in realnames:
+			name = realnames[users[n]]
+		else:
+			name = users[n]
+		user_string = fixed_length_string(name, len_user_string)
 		tot_cnt_string = fixed_length_string("{}".format(jobcnt[n]), len_cnt_string)
 		run_cnt_string = fixed_length_string("{}".format(runcnt[n]), len_cnt_string)
 		que_cnt_string = fixed_length_string("{}".format(quecnt[n]), len_cnt_string)
