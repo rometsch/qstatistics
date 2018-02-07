@@ -33,3 +33,4 @@ just like using it with the =ssh= command (this is used internally).
   - =t= : total number of jobs
   - =r= : running jobs
   - =q= : queued jobs
++ =-r= : try to look up real names with getent
