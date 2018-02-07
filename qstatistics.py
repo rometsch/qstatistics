@@ -117,20 +117,20 @@ for user in user_stats:
 
 NToList = args.NumToPrint
 
-len_user_string = 15
+len_user_string = 20
 len_cnt_string = 6
 
 def get_realnames(ids):
 	realnames = {}
 	try:
 		ans = subprocess.check_output(['getent', 'passwd'] +
-									  +['{0}'.format(id) for id in ids]).decode('utf-8')
+			  ['{0}'.format(id) for id in ids]).decode('utf-8')
 		for line in ans.splitlines():
 			id = line.split(":")[0]
 			name = line.split(':')[4]
-			realnames[id] = name:
-		except subprocess.RuntimeError:
-			pass
+			realnames[id] = name
+	except subprocess.CalledProcessError:
+	   	pass
 	return realnames
 
 
