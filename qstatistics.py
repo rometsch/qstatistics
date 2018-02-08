@@ -101,19 +101,23 @@ else:
 queue_stats = {}
 for queue in selected_queues:
 	queue_stats[queue] = {"users" : [], "jobstot" : [],
-						  "total" : 0, "jobsRunning" : [], "jobsQueued" : []}
+						  "total" : 0, "totRunning" : 0, "totQueued" : 0,
+						  "jobsRunning" : [], "jobsQueued" : []}
 for user in user_stats:
 	for queue in selected_queues:
 		if queue in user_stats[user]:
 			queue_stats[queue]["users"].append(user)
 			queue_stats[queue]["jobstot"].append(user_stats[user][queue]["tot"])
 			queue_stats[queue]["total"] += user_stats[user][queue]["tot"]
-			for state, key in zip(["R","Q"], ["jobsRunning", "jobsQueued"]):
+			for state, state_str, tot_str in zip(["R","Q"],
+												 ["jobsRunning", "jobsQueued"],
+												 ["totRunning", "totQueued"]):
 				if state in user_stats[user][queue]:
 					num = user_stats[user][queue][state]
 				else:
 					num = 0
-				queue_stats[queue][key].append(num)
+				queue_stats[queue][state_str].append(num)
+				queue_stats[queue][tot_str] += num
 
 
 NToList = args.NumToPrint
@@ -162,6 +166,8 @@ for queue in selected_queues:
 	print("\n#-----------------------------------")
 	print("# queue:\t{}".format(queue))
 	print("# jobs: \t{}".format(queue_stats[queue]["total"]))
+	print("# runing: \t{}".format(queue_stats[queue]["totRunning"]))
+	print("# queued: \t{}".format(queue_stats[queue]["totQueued"]))
 	print("#-----------------------------------")
 	N = min(NToList, len(jobcnt))
 	for n in inds[:N]:
