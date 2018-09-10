@@ -94,8 +94,6 @@ for key in jobs:
         else:
             user_stats[user][queue][state] += 1
     # Count cpus and gpus
-    print(nodeInfo)
-    print(user_stats[user])
     for pu in ['ppn', 'gpus']:
         l = [s.split("=")[1] for s in nodeInfo if pu in s]
         if len(l) == 1:
