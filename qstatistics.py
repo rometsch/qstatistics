@@ -16,7 +16,7 @@ ap.add_argument("-q", "--queue", nargs="+",
                 default=None,
                 help="Queues to print the statistics for. Print all found queues by default. Add queues separeted by a space.")
 ap.add_argument("-f", help="Use a text file as input rather than using the qstat -f command. This is useful for development")
-ap.add_argument("-s", "--sort", choices = ["t", "r", "q"], default = "r"
+ap.add_argument("-s", "--sort", choices = ["t", "r", "q", "gpu", "cpu"], default = "r"
                 , help="The number to sort the output by:\nt -> total number of jobs\nr -> running jobs\nq -> queued jobs")
 ap.add_argument("-r", "--realnames", default=False, action="store_true", help="Try to resolve the real names with getent")
 args = ap.parse_args()
