@@ -194,6 +194,11 @@ for queue in selected_queues:
         sort_list = jobcnt
     elif args.sort == "q":
         sort_list = quecnt
+    elif args.sort == "cpu":
+        sort_list = cpucnt
+    elif args.sort == "gpu":
+        sort_list = gpucnt
+
     else:
         sort_list = runcnt
     inds = argsort(sort_list)
