@@ -201,8 +201,9 @@ for queue in selected_queues:
 
     else:
         sort_list = runcnt
-    inds = argsort(sort_list)
+    inds = argsort(sort_list[2:])
     inds.reverse()
+    inds = [0,1] + [n+2 for n in inds]
     print("\n#-----------------------------------")
     print("# queue:\t{}".format(queue))
     print("# jobs: \t{}".format(queue_stats[queue]["total"]))
